@@ -1,0 +1,237 @@
+---
+img_root: xray_root
+annotations_url: none
+priority_transform_modality: image
+signal_to_noise_ratio: 0.7
+jitter_pool: max
+multi_view_per_sample: true
+to_each_view_its_own_label: false
+experiments:
+  train_set:
+    annotations_path: inner_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities:
+      ID:
+        type: ID_from_indices
+        consistency: Number
+        num_channels: 256
+        modality: output
+      text:
+        modality: input
+        type: Char_Sequence
+        column_name: Rprt
+        language_space: sv
+        case_sensitive: false
+        dictionary: " .,\\-abcdefghijklmnopqrstuvwxyzäåö$()"
+        discard_numbers: true
+        sentence_length: 512
+        model_cfgs:
+          model_type: One_to_One
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            add_max_pool_after_each_block: true
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [5, 3]
+      image:
+        modality: input
+        type: Image_from_Filename
+        column_name: Filename
+        colorspace: Gray
+        scale_to: 256
+        keep_aspect: true
+        width: 256
+        height: 256
+        model_cfgs:
+          model_type: One_to_One
+          heads:
+            - image
+          tails:
+            - implicit_image
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [3, 3]
+      Exam_View:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_view
+        priority_labels:
+          - frontal
+          - sida
+          - vridning
+        to_each_view_its_own_label: true
+      Body_Part:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_body_part
+        to_each_view_its_own_label: false
+      BP_hip:
+        modality: output
+        type: Multi_Bipolar
+        to_each_view_its_own_label: false
+        columns:
+          - ao_acetabulum
+          - ao_acetabulum_B
+          - ao_acetabulum_B_left
+          - ao_acetabulum_left
+          - ao_hip
+          - ao_hip_A
+          - ao_hip_A_left
+          - ao_hip_A_right
+          - ao_hip_A1
+          - ao_hip_A1_left
+          - ao_hip_A1_right
+          - ao_hip_A11
+          - ao_hip_A11_left
+          - ao_hip_A11_right
+          - ao_hip_A12
+          - ao_hip_A12_dislocated
+          - ao_hip_A12_dislocated_left
+          - ao_hip_A12_dislocated_right
+          - ao_hip_A12_left
+          - ao_hip_A12_right
+          - ao_hip_A12_trochanter_major
+          - ao_hip_A12_trochanter_major_left
+          - ao_hip_A12_trochanter_major_right
+          - ao_hip_A13
+          - ao_hip_A13_dislocated
+          - ao_hip_A13_dislocated_left
+          - ao_hip_A13_dislocated_right
+          - ao_hip_A13_left
+          - ao_hip_A13_right
+          - ao_hip_A2
+          - ao_hip_A2_left
+          - ao_hip_A2_right
+          - ao_hip_A22
+          - ao_hip_A22_dislocated
+          - ao_hip_A22_dislocated_left
+          - ao_hip_A22_dislocated_right
+          - ao_hip_A22_left
+          - ao_hip_A22_long_minor
+          - ao_hip_A22_long_minor_left
+          - ao_hip_A22_long_minor_right
+          - ao_hip_A22_right
+          - ao_hip_A23
+          - ao_hip_A23_left
+          - ao_hip_A3
+          - ao_hip_A3_left
+          - ao_hip_A3_right
+          - ao_hip_A31
+          - ao_hip_A31_left
+          - ao_hip_A33
+          - ao_hip_A33_diaphysis
+          - ao_hip_A33_diaphysis_left
+          - ao_hip_A33_left
+          - ao_hip_A33_right
+          - ao_hip_A33_trochanter_major
+          - ao_hip_A33_trochanter_major_left
+          - ao_hip_A33_trochanter_major_right
+          - ao_hip_B
+          - ao_hip_B_left
+          - ao_hip_B_right
+          - ao_hip_B1
+          - ao_hip_B1_left
+          - ao_hip_B1_right
+          - ao_hip_B11
+          - ao_hip_B11_left
+          - ao_hip_B11_right
+          - ao_hip_B12
+          - ao_hip_B12_left
+          - ao_hip_B12_right
+          - ao_hip_B13
+          - ao_hip_B13_left
+          - ao_hip_B13_right
+          - ao_hip_B2
+          - ao_hip_B2_left
+          - ao_hip_B2_right
+          - ao_hip_B21
+          - ao_hip_B21_dislocated
+          - ao_hip_B21_dislocated_left
+          - ao_hip_B21_dislocated_right
+          - ao_hip_B21_left
+          - ao_hip_B21_right
+          - ao_hip_B22
+          - ao_hip_B22_dislocated
+          - ao_hip_B22_dislocated_left
+          - ao_hip_B22_dislocated_right
+          - ao_hip_B22_left
+          - ao_hip_B22_right
+          - ao_hip_B23
+          - ao_hip_B23_dislocated
+          - ao_hip_B23_dislocated_left
+          - ao_hip_B23_dislocated_right
+          - ao_hip_B23_left
+          - ao_hip_B23_right
+          - ao_hip_B3
+          - ao_hip_B3_right
+          - ao_hip_left
+          - ao_hip_right
+          - ao_pelvic
+          - ao_pelvic_A
+          - ao_pelvic_A2
+          - ao_pelvic_A22
+          - ao_pelvic_left
+          - ao_pelvic_right
+          - Fracture
+          - general_Acetabulum
+          - general_DHS
+          - general_DHS_left
+          - general_DHS_right
+          - general_Dislocation
+          - general_Femur_diaphysis
+          - general_frx
+          - general_frx_left
+          - general_frx_right
+          - general_Hemi
+          - general_Hip
+          - general_IM-nail
+          - general_IM-nail_left
+          - general_IM-nail_right
+          - general_Implant
+          - general_Implant_failure
+          - general_OA
+          - general_Old_fracture
+          - general_Old_fracture_left
+          - general_Old_fracture_right
+          - general_Osteolysis
+          - general_Osteolysis_left
+          - general_Osteolysis_right
+          - general_Pelvic_ring
+          - general_Screws
+          - general_Screws_left
+          - general_Screws_right
+          - general_THR
+          - general_THR_left
+          - general_THR_right
+          - general_Tumor
+          - general_Tumor_malignant
+          - oa_left_KL_0
+          - oa_left_KL_1
+          - oa_left_KL_2
+          - oa_left_KL_3
+          - oa_left_KL_4
+          - oa_right_KL_0
+          - oa_right_KL_1
+          - oa_right_KL_2
+          - oa_right_KL_3
+          - oa_right_KL_4
+  pseudo_train_set:
+    annotations_path: inner_pseudo_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  max_train_set:
+    annotations_path: inner_train_max_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  val_set:
+    annotations_path: inner_validation_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set

@@ -1,0 +1,119 @@
+---
+img_root: xray_root
+annotations_url: none
+priority_transform_modality: image
+signal_to_noise_ratio: 0.7
+jitter_pool: max
+multi_view_per_sample: true
+to_each_view_its_own_label: false
+experiments:
+  train_set:
+    annotations_path: inner_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities:
+      ID:
+        type: ID_from_indices
+        consistency: Number
+        num_channels: 256
+        modality: output
+      text:
+        modality: input
+        type: Char_Sequence
+        column_name: Rprt
+        language_space: sv
+        case_sensitive: false
+        dictionary: " .,\\-abcdefghijklmnopqrstuvwxyzäåö$()"
+        discard_numbers: true
+        sentence_length: 512
+        model_cfgs:
+          model_type: One_to_One
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            add_max_pool_after_each_block: true
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [5, 3]
+      image:
+        modality: input
+        type: Image_from_Filename
+        column_name: Filename
+        colorspace: Gray
+        scale_to: 256
+        keep_aspect: true
+        width: 256
+        height: 256
+        model_cfgs:
+          model_type: One_to_One
+          heads:
+            - image
+          tails:
+            - implicit_image
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [3, 3]
+      Exam_View:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_view
+        priority_labels:
+          - frontal
+          - sida
+          - vridning
+        to_each_view_its_own_label: true
+      Body_Part:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_body_part
+        to_each_view_its_own_label: false
+      Side:
+        modality: output
+        type: Bipolar
+        column_name: Side
+        dictionary:
+          positive: right
+          negative: left
+        to_each_view_its_own_label: true
+      BP_hot:
+        modality: output
+        type: Multi_Bipolar
+        to_each_view_its_own_label: false
+        columns:
+          - alt_frx_detail_oblique_spiral
+          - frx_detail_Angulation
+          - frx_detail_Cast
+          - frx_detail_Cast_minimal
+          - frx_detail_Cast_plaster
+          - frx_detail_Cast_synthetic
+          - frx_detail_Comminute
+          - frx_detail_Displaced
+          - frx_detail_Fracture
+          - frx_detail_Fragment
+          - frx_detail_Intra-articular
+          - frx_detail_Oblique
+          - frx_detail_Previous
+          - frx_detail_Pseudo
+          - frx_detail_Slightly_displaced
+          - frx_detail_Spiral
+          - frx_detail_Transverse
+          - frx_detail_Undisplaced
+          - frx_detail_Wedge
+  pseudo_train_set:
+    annotations_path: inner_pseudo_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  max_train_set:
+    annotations_path: inner_train_max_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  val_set:
+    annotations_path: inner_validation_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set

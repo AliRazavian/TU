@@ -1,0 +1,177 @@
+---
+img_root: xray_root
+annotations_url: none
+priority_transform_modality: image
+signal_to_noise_ratio: 0.9
+jitter_pool: max
+multi_view_per_sample: true
+to_each_view_its_own_label: false
+experiments:
+  train_set:
+    annotations_path: inner_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities:
+      ID:
+        type: ID_from_indices
+        consistency: Number
+        num_channels: 256
+        modality: output
+      text:
+        modality: input
+        type: Char_Sequence
+        column_name: Rprt
+        language_space: sv
+        case_sensitive: false
+        dictionary: " .,\\-abcdefghijklmnopqrstuvwxyzäåö$()"
+        discard_numbers: true
+        sentence_length: 512
+        model_cfgs:
+          model_type: One_to_One
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            add_max_pool_after_each_block: true
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [5, 3]
+      image:
+        modality: input
+        type: Image_from_Filename
+        column_name: Filename
+        colorspace: Gray
+        scale_to: 256
+        keep_aspect: true
+        width: 256
+        height: 256
+        model_cfgs:
+          model_type: One_to_One
+          heads:
+            - image
+          tails:
+            - implicit_image
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [3, 3]
+      Exam_View:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_view
+        priority_labels:
+          - frontal
+          - sida
+          - vridning
+        to_each_view_its_own_label: true
+      Side:
+        modality: output
+        type: Bipolar
+        column_name: Side
+        dictionary:
+          positive: right
+          negative: left
+        to_each_view_its_own_label: true
+      BP_ankle:
+        modality: output
+        type: Multi_Bipolar
+        to_each_view_its_own_label: false
+        columns:
+          - ao_F2
+          - ao_F2A
+          - ao_F2B
+          - ao_F3
+          - ao_F3A
+          - ao_F3B
+          - ao_Fibula
+          - ao_MA
+          - ao_MA1
+          - ao_MA11
+          - ao_MA12
+          - ao_MA13
+          - ao_MA2
+          - ao_MA21
+          - ao_MA3
+          - ao_MA31
+          - ao_Malleolar
+          - ao_MB
+          - ao_MB1
+          - ao_MB11
+          - ao_MB12
+          - ao_MB2
+          - ao_MB21
+          - ao_MB22
+          - ao_MB23
+          - ao_MB3
+          - ao_MB31
+          - ao_MB32
+          - ao_MB33
+          - ao_MC
+          - ao_MC1
+          - ao_MC11
+          - ao_MC12
+          - ao_MC13
+          - ao_MC2
+          - ao_MC21
+          - ao_MC22
+          - ao_MC23
+          - ao_MC3
+          - ao_MC33
+          - ao_TA
+          - ao_TA1
+          - ao_TA11
+          - ao_TA2
+          - ao_TB
+          - ao_TB1
+          - ao_TB11
+          - ao_TB12
+          - ao_TC
+          - ao_TD_A
+          - ao_TD_A1
+          - ao_TD_B
+          - ao_TD_B2
+          - ao_Tibia_diaphyseal
+          - ao_Tibia_distal
+          - foot_bones_Calcaneus
+          - foot_bones_Os_metatarsale
+          - foot_bones_Os_metatarsale_V
+          - foot_bones_Os_naviculare
+          - foot_bones_Talus
+          - Fracture
+          - Other_bone
+          - Previous_fracture
+      BP_ankle_images:
+        modality: output
+        type: Multi_Bipolar
+        to_each_view_its_own_label: true
+        columns:
+          - data_medial_clear_space_same
+      M_ankle:
+        modality: output
+        type: Multi_Coordinate
+        column_prefixes:
+          - data_medial_clear_space_c1
+          - data_medial_clear_space_c2
+          - data_tibiotalar_distance_c1
+          - data_tibiotalar_distance_c2
+  pseudo_train_set:
+    annotations_path: inner_pseudo_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  max_train_set:
+    annotations_path: inner_train_max_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  val_set:
+    annotations_path: inner_validation_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set
+  test_set:
+    annotations_path: inner_test_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set

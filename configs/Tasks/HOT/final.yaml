@@ -1,0 +1,8 @@
+---
+task_type: training
+dataset_name: xray_hot
+train_set_name: max_train_set
+val_set_name: val_set
+validate_when_epoch_is_devisable_by: 2
+apply:
+  classification: true

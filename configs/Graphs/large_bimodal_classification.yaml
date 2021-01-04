@@ -1,0 +1,155 @@
+---
+modalities:
+  experiment_modalities:
+    - image
+    - text
+    - EXPERIMENT_EXPLICIT_CLASSIFICATION_MODALITIES
+    - EXPERIMENT_EXPLICIT_REGRESSION_MODALITIES
+    - EXPERIMENT_EXPLICIT_PSEUDO_OUTPUT_MODALITIES
+  graph_specific_modalities:
+    abstract_fork:
+      type: implicit
+      consistency: 2D
+    abstract_visual_fork:
+      type: implicit
+      consistency: 2D
+    visual_morph:
+      type: implicit
+      consistency: 2D
+    language_morph:
+      type: implicit
+      consistency: 1D
+    abstract_language_style:
+      type: style
+      distribution: gaussian
+      num_channels: 128
+      consistency: 1D
+      modality: output
+    abstract_visual_style:
+      type: style
+      distribution: gaussian
+      num_channels: 256 # 128
+      consistency: 2D
+      modality: output
+    concrete_visual_style:
+      type: style
+      distribution: gaussian
+      num_channels: 256 # 128
+      consistency: 2D
+      modality: output
+    concrete_image:
+      type: implicit
+      consistency: 2D
+      num_channels: 64
+    abstract_language_fork:
+      type: implicit
+      consistency: 2D
+    concrete_language_style:
+      type: style
+      distribution: gaussian
+      num_channels: 128
+      consistency: 1D
+      modality: output
+    word:
+      type: implicit
+      consistency: 2D
+      num_channels: 64
+models:
+  experiment_models:
+    - image
+    - text
+    - EXPERIMENT_EXPLICIT_CLASSIFICATION_MODALITIES
+    - EXPERIMENT_EXPLICIT_REGRESSION_MODALITIES
+    - EXPERIMENT_EXPLICIT_PSEUDO_OUTPUT_MODALITIES
+  graph_specific_models:
+    concrete_visual_fork_path:
+      model_type: One_to_Many
+      heads:
+        - implicit_image
+      tails:
+        - concrete_image
+        - implicit_concrete_visual_style
+      neural_net_cfgs:
+        neural_net_type: Fork
+        consistency: 2D
+    visual_path:
+      model_type: One_to_One
+      heads:
+        - concrete_image
+      tails:
+        - abstract_visual_fork
+      neural_net_cfgs:
+        neural_net_type: cascade
+        consistency: 2D
+        block_type: ResNetBasic
+        add_max_pool_after_each_block: true
+        block_output_cs: [64, 128, 256, 512]
+        block_counts: [4, 2, 2, 2]
+        ladder: true
+    concrete_language_fork_path:
+      model_type: One_to_Many
+      heads:
+        - implicit_text
+      tails:
+        - word
+        - implicit_concrete_language_style
+      neural_net_cfgs:
+        neural_net_type: Fork
+        consistency: 1D
+    abstract_visual_fork_path:
+      model_type: One_to_Many
+      heads:
+        - abstract_visual_fork
+      tails:
+        - visual_morph
+        - implicit_ID
+        - implicit_abstract_visual_style
+        - EXPERIMENT_IMPLICIT_PSEUDO_OUTPUT_MODALITIES
+        - EXPERIMENT_IMPLICIT_REGRESSION_MODALITIES
+      neural_net_cfgs:
+        neural_net_type: Fork
+        consistency: 2D
+    language_path:
+      model_type: One_to_One
+      heads:
+        - word
+      tails:
+        - abstract_language_fork
+      neural_net_cfgs:
+        neural_net_type: cascade
+        consistency: 2D
+        block_type: ResNetBasic
+        add_max_pool_after_each_block: true
+        block_output_cs: [64, 128, 256, 512, 512]
+        block_counts: [2, 2, 2, 2, 2]
+        ladder: "true"
+    abstract_language_fork_path:
+      model_type: One_to_Many
+      heads:
+        - abstract_language_fork
+      tails:
+        - language_morph
+        - implicit_abstract_language_style
+      neural_net_cfgs:
+        neural_net_type: Fork
+        consistency: 1D
+    morph_multiple_path:
+      model_type: Many_to_One
+      heads:
+        - language_morph
+        - visual_morph
+      tails:
+        - abstract_fork
+      neural_net_cfgs:
+        neural_net_type: Morph
+    abstract_fork_path:
+      model_type: One_to_Many
+      heads:
+        - abstract_fork
+      tails:
+        - EXPERIMENT_IMPLICIT_CLASSIFICATION_MODALITIES
+      remove_from_tails:
+        - implicit_ID
+      neural_net_cfgs:
+        neural_net_type: Fork
+        consistency: 2D

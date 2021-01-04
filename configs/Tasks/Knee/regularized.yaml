@@ -1,0 +1,13 @@
+---
+task_type: training
+dataset_name: xray_knee
+train_set_name: train_set
+pseudo_set_name: pseudo_train_set
+val_set_name: val_set
+test_set_name: test_set
+batch_size_multiplier: 0.33
+validate_when_epoch_is_devisable_by: 2
+apply:
+  classification: true
+  reconstruction: true
+  # identification: true - this only overfits :-(

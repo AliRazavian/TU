@@ -1,0 +1,121 @@
+---
+graph_name: large_bimodal_classification
+current_epoch: 0
+optimizer_type: sgd
+main_task: Knee
+forward_noise: 0.05
+scenes:
+  - name: I_clean
+    repeat: 1
+    epochs: 50
+    forward_noise: 0
+    tasks:
+      - Ankle/unregulated
+      - Elbow/unregulated
+      - Wrist/unregulated
+      - HOT/unregulated
+      - Hip/unregulated
+      - Knee/unregulated
+      # - Old/fracture_unregulated
+      # - Old/implant_unregulated
+      # - Old/tumor_unregulated
+      # - Old/osteoarthritis_unregulated
+    learning_rate:
+      type: decay
+      function: cosine
+      starting_value: 0.025
+  - name: II_noise
+    repeat: 1
+    epochs: 60
+    forward_noise: 0.05
+    tasks:
+      - Ankle/unregulated
+      - Elbow/unregulated
+      - Wrist/unregulated
+      - HOT/unregulated
+      - Hip/unregulated
+      - Knee/unregulated
+      # - Old/fracture_unregulated
+      # - Old/implant_unregulated
+      # - Old/tumor_unregulated
+      # - Old/osteoarthritis_unregulated
+    learning_rate:
+      type: decay
+      function: cosine
+      starting_value: 0.01
+  - name: III_recon
+    repeat: 1
+    epochs: 20
+    forward_noise: 0.05
+    tasks:
+      - Ankle/regularized
+      - Elbow/regularized
+      - Wrist/regularized
+      - HOT/regularized
+      - Hip/regularized
+      - Knee/regularized
+      # - Old/fracture_unregulated
+      # - Old/implant_unregulated
+      # - Old/tumor_unregulated
+      # - Old/osteoarthritis_unregulated
+    learning_rate:
+      type: decay
+      function: cosine
+      starting_value: 0.01
+  - name: IV_pseudo
+    repeat: 1
+    epochs: 20
+    tasks:
+      - Ankle/unregulated
+      - Elbow/unregulated
+      - Wrist/unregulated
+      - HOT/unregulated
+      - Hip/unregulated
+      - Knee/unregulated
+      # - Old/implant_unregulated
+      # - Old/fracture_unregulated
+      # - Old/tumor_unregulated
+      # - Old/osteoarthritis_unregulated
+    has_pseudo_labels: true
+    forward_noise: 0.10
+    learning_rate:
+      type: decay
+      function: cosine
+      starting_value: 0.01
+  - name: V_avg
+    repeat: 5
+    epochs: 20
+    tasks:
+      - Wrist/unregulated
+      - Ankle/unregulated
+      - Elbow/unregulated
+      - HOT/unregulated
+      - Hip/unregulated
+      - Knee/unregulated
+      # - Old/fracture_regularized
+      # - Old/implant_regularized
+      # - Old/tumor_regularized
+      # - Old/osteoarthritis_regularized
+    stochastic_weight_averaging: true
+    stochastic_weight_averaging_last: false
+    has_pseudo_labels: false
+    forward_noise: 0.05
+    learning_rate:
+      type: decay
+      function: cosine
+      starting_value: 0.01
+  - name: VI
+    repeat: 1
+    epochs: 20
+    forward_noise: 0.05
+    tasks:
+      - Wrist/final
+      - Ankle/final
+      # - Elbow/final
+      - Hip/final
+      - Knee/final
+      - HOT/final
+    learning_rate:
+      type: decay
+      function: cosine
+      starting_value: 0.01

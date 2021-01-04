@@ -1,0 +1,120 @@
+---
+img_root: xray_root
+annotations_url: none
+priority_transform_modality: image
+signal_to_noise_ratio: 0.7
+jitter_pool: max
+multi_view_per_sample: true
+to_each_view_its_own_label: false
+experiments:
+  train_set:
+    annotations_path: inner_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities:
+      ID:
+        type: ID_from_indices
+        consistency: Number
+        num_channels: 256
+        modality: output
+      text:
+        modality: input
+        type: Char_Sequence
+        column_name: Rprt
+        language_space: sv
+        case_sensitive: false
+        dictionary: " .,\\-abcdefghijklmnopqrstuvwxyzäåö$()"
+        discard_numbers: true
+        sentence_length: 512
+        model_cfgs:
+          model_type: One_to_One
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            add_max_pool_after_each_block: true
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [5, 3]
+      image:
+        modality: input
+        type: Image_from_Filename
+        column_name: Filename
+        colorspace: Gray
+        scale_to: 256
+        keep_aspect: true
+        width: 256
+        height: 256
+        model_cfgs:
+          model_type: One_to_One
+          heads:
+            - image
+          tails:
+            - implicit_image
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [3, 3]
+      Exam_View:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_view
+        priority_labels:
+          - frontal
+          - sida
+          - vridning
+        to_each_view_its_own_label: true
+      BP_elbow:
+        modality: output
+        type: Multi_Bipolar
+        to_each_view_its_own_label: false
+        columns:
+          - ao_humerus_distal_A
+          - ao_humerus_distal_A2
+          - ao_humerus_distal_B
+          - ao_humerus_distal_C
+          - ao_radius_proximal_A
+          - ao_radius_proximal_A2
+          - ao_radius_proximal_B
+          - ao_radius_proximal_B1
+          - ao_radius_proximal_C
+          - ao_ulna_proximal_B
+          - ao_ulna_proximal_B1
+          - ao_ulna_proximal_B1,_multifragmentary
+          - ao_ulna_proximal_B1,_simple
+          - ao_ulna_proximal_B2
+          - ao_ulna_proximal_B2,_tip
+          - ao_ulna_proximal_Dislocated
+          - Fracture
+          - general_Arthritis
+          - general_Dislocation
+          - general_Effusion
+          - general_Elbow_arthroplasty
+          - general_Frx
+          - general_Humerus
+          - general_Humerus,_distal_end_segment
+          - general_Implant
+          - general_Medium
+          - general_Old_fracture
+          - general_Osteoaarthritis
+          - general_Plate
+          - general_Radius
+          - general_Radius,_distal_end_segment
+          - general_Radius,_proximal_end_segment
+          - general_Screws
+          - general_Ulna
+          - general_Ulna,_diaphysis
+          - general_Ulna,_distal_end_segment
+          - general_Ulna,_proximal_end_segment
+          - general_Zuggertung
+  pseudo_train_set:
+    annotations_path: inner_pseudo_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  val_set:
+    annotations_path: inner_validation_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set

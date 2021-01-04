@@ -1,0 +1,10 @@
+---
+task_type: training
+dataset_name: xray_wrist
+train_set_name: max_train_set
+val_set_name: val_set
+test_set_name: test_set
+validate_when_epoch_is_devisable_by: 2
+apply:
+  classification: true
+  regression: true

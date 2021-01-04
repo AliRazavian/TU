@@ -1,0 +1,230 @@
+---
+img_root: xray_root
+annotations_url: none
+priority_transform_modality: image
+signal_to_noise_ratio: 0.7
+jitter_pool: max
+multi_view_per_sample: true
+to_each_view_its_own_label: false
+experiments:
+  train_set:
+    annotations_path: inner_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities:
+      ID:
+        type: ID_from_indices
+        consistency: Number
+        num_channels: 256
+        modality: output
+      text:
+        modality: input
+        type: Char_Sequence
+        column_name: Rprt
+        language_space: sv
+        case_sensitive: false
+        dictionary: " .,\\-abcdefghijklmnopqrstuvwxyzäåö$()"
+        discard_numbers: true
+        sentence_length: 512
+        model_cfgs:
+          model_type: One_to_One
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            add_max_pool_after_each_block: true
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [5, 3]
+      image:
+        modality: input
+        type: Image_from_Filename
+        column_name: Filename
+        colorspace: Gray
+        scale_to: 256
+        keep_aspect: true
+        width: 256
+        height: 256
+        model_cfgs:
+          model_type: One_to_One
+          heads:
+            - image
+          tails:
+            - implicit_image
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [3, 3]
+      Exam_View:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_view
+        priority_labels:
+          - frontal
+          - sida
+          - vridning
+        to_each_view_its_own_label: true
+      Body_Part:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_body_part
+        to_each_view_its_own_label: false
+      BP_knee:
+        modality: output
+        type: Multi_Bipolar
+        to_each_view_its_own_label: false
+        columns:
+          - alt_ao_dist_femur_maybe_Y
+          - alt_ao_prox_tibia_b2_and_b3_lateral
+          - alt_ao_prox_tibia_b2_and_b3_medial
+          - alt_ao_prox_tibia_c2_and_c3_fragmentary
+          - alt_oa_0_to_1
+          - alt_oa_0_to_2
+          - alt_oa_1_to_3
+          - alt_oa_2_to_4
+          - alt_oa_3_to_4
+          - ao_diaph_femur_Left
+          - ao_diaph_femur_Left_A
+          - ao_diaph_femur_Left_A1
+          - ao_diaph_femur_Left_distal
+          - ao_diaph_femur_Right
+          - ao_diaph_femur_Right_A
+          - ao_diaph_femur_Right_A1
+          - ao_diaph_femur_Right_distal
+          - ao_diaph_tibia_A
+          - ao_diaph_tibia_A1
+          - ao_diaph_tibia_A3
+          - ao_diaph_tibia_Distal_1/3
+          - ao_diaph_tibia_Middle_1/3
+          - ao_dist_femur_A
+          - ao_dist_femur_A1
+          - ao_dist_femur_A11
+          - ao_dist_femur_A12
+          - ao_dist_femur_A2
+          - ao_dist_femur_A21
+          - ao_dist_femur_A23
+          - ao_dist_femur_B
+          - ao_dist_femur_B1
+          - ao_dist_femur_B11
+          - ao_dist_femur_B2
+          - ao_dist_femur_C
+          - ao_fibula_1
+          - ao_fibula_1¤n
+          - ao_fibula_1¤o
+          - ao_fibula_1A
+          - ao_fibula_1B
+          - ao_fibula_2
+          - ao_fibula_2¤a
+          - ao_fibula_2¤b
+          - ao_fibula_2¤c
+          - ao_fibula_2A
+          - ao_fibula_2B
+          - ao_fibula_3
+          - ao_fibula_3A
+          - ao_patella_A
+          - ao_patella_A1
+          - ao_patella_A1a
+          - ao_patella_A1b
+          - ao_patella_A1c
+          - ao_patella_A1d
+          - ao_patella_B
+          - ao_patella_B1
+          - ao_patella_B11
+          - ao_patella_B12
+          - ao_patella_B2
+          - ao_patella_B21
+          - ao_patella_C
+          - ao_patella_C1
+          - ao_patella_C11
+          - ao_patella_C12
+          - ao_patella_C13
+          - ao_patella_C2
+          - ao_patella_C3
+          - ao_patella_Dislocated
+          - ao_prox_tibia_A
+          - ao_prox_tibia_A__dislocated
+          - ao_prox_tibia_A1
+          - ao_prox_tibia_A11
+          - ao_prox_tibia_A12
+          - ao_prox_tibia_A13
+          - ao_prox_tibia_A13a
+          - ao_prox_tibia_A2
+          - ao_prox_tibia_A23
+          - ao_prox_tibia_B
+          - ao_prox_tibia_B¤¤lx
+          - ao_prox_tibia_B¤¤t
+          - ao_prox_tibia_B¤¤u
+          - ao_prox_tibia_B1
+          - ao_prox_tibia_B11
+          - ao_prox_tibia_B12
+          - ao_prox_tibia_B13
+          - ao_prox_tibia_B2
+          - ao_prox_tibia_B21
+          - ao_prox_tibia_B22
+          - ao_prox_tibia_B3
+          - ao_prox_tibia_B31
+          - ao_prox_tibia_B33
+          - ao_prox_tibia_C
+          - ao_prox_tibia_C1
+          - ao_prox_tibia_C2
+          - ao_prox_tibia_C3
+          - ao_prox_tibia_C31
+          - ao_prox_tibia_Dislocated
+          - ao_prox_tibia_Lateral
+          - ao_prox_tibia_Medial
+          - Fracture
+          - general_Cerclage
+          - general_Femur
+          - general_Femur_diaphyseal
+          - general_Femur_distal
+          - general_Fibula
+          - general_Fragment
+          - general_IM-nail
+          - general_IM-nail_femur
+          - general_IM-nail_tibia
+          - general_Implant
+          - general_Implant_failure
+          - general_K-wires
+          - general_Old_fracture
+          - general_Patella
+          - general_Peri-implant_fracture
+          - general_Plate
+          - general_Screws
+          - general_Tibia
+          - general_Tibia_diaphyseal
+          - general_Tibia_proximal
+          - general_TKR
+          - general_Unicompartmental
+          - general_X-ligament
+          - oa_KL_0
+          - oa_KL_1
+          - oa_KL_2
+          - oa_KL_3
+          - oa_KL_4
+          - oa_position_Lateral
+          - oa_position_Medial
+          - oa_position_Patella
+          - osteoarthritis_Osteonecrosis
+          - Osteonecrosis_femur
+          - Other_joint_destructions
+  pseudo_train_set:
+    annotations_path: inner_pseudo_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  max_train_set:
+    annotations_path: inner_train_max_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  val_set:
+    annotations_path: inner_validation_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set
+  test_set:
+    annotations_path: inner_test_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set

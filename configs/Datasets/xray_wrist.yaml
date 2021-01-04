@@ -1,0 +1,176 @@
+---
+img_root: xray_root
+annotations_url: none
+priority_transform_modality: image
+signal_to_noise_ratio: 0.7
+jitter_pool: max
+multi_view_per_sample: true
+to_each_view_its_own_label: false
+experiments:
+  train_set:
+    annotations_path: inner_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities:
+      ID:
+        type: ID_from_indices
+        consistency: Number
+        num_channels: 256
+        modality: output
+      text:
+        modality: input
+        type: Char_Sequence
+        column_name: Rprt
+        language_space: sv
+        case_sensitive: false
+        dictionary: " .,\\-abcdefghijklmnopqrstuvwxyzäåö$()"
+        discard_numbers: true
+        sentence_length: 512
+        model_cfgs:
+          model_type: One_to_One
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            add_max_pool_after_each_block: true
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [5, 3]
+      image:
+        modality: input
+        type: Image_from_Filename
+        column_name: Filename
+        colorspace: Gray
+        scale_to: 256
+        keep_aspect: true
+        width: 256
+        height: 256
+        model_cfgs:
+          model_type: One_to_One
+          heads:
+            - image
+          tails:
+            - implicit_image
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            block_output_cs: [64, 64]
+            block_counts: [1, 1]
+            kernel_sizes: [3, 3]
+      Exam_View:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_view
+        priority_labels:
+          - frontal
+          - sida
+          - vridning
+        to_each_view_its_own_label: true
+      Side:
+        modality: output
+        type: Bipolar
+        column_name: Side
+        dictionary:
+          positive: right
+          negative: left
+        to_each_view_its_own_label: true
+      BP_wrist:
+        modality: output
+        type: Multi_Bipolar
+        to_each_view_its_own_label: false
+        columns:
+          - alt_ao_R_colles
+          - alt_ao_R_colles_w32
+          - alt_ao_R_sagitall_simple
+          - ao_radius_distal_A
+          - ao_radius_distal_A1
+          - ao_radius_distal_A2
+          - ao_radius_distal_A21
+          - ao_radius_distal_A22
+          - ao_radius_distal_A23
+          - ao_radius_distal_A3
+          - ao_radius_distal_A31
+          - ao_radius_distal_A32
+          - ao_radius_distal_A33
+          - ao_radius_distal_B
+          - ao_radius_distal_B1
+          - ao_radius_distal_B11
+          - ao_radius_distal_B13
+          - ao_radius_distal_B2
+          - ao_radius_distal_B3
+          - ao_radius_distal_B31
+          - ao_radius_distal_C
+          - ao_radius_distal_C1
+          - ao_radius_distal_C11
+          - ao_radius_distal_C12
+          - ao_radius_distal_C13
+          - ao_radius_distal_C2
+          - ao_radius_distal_C21
+          - ao_radius_distal_C22
+          - ao_radius_distal_C3
+          - ao_radius_distal_C31
+          - ao_radius_distal_C32
+          - ao_ulna_distal_A
+          - ao_ulna_distal_A1
+          - ao_ulna_distal_A11
+          - ao_ulna_distal_A12
+          - ao_ulna_distal_A2
+          - ao_ulna_distal_A21
+          - ao_ulna_distal_A22
+          - ao_ulna_distal_A23
+          - ao_ulna_distal_A3
+          - ao_ulna_distal_C
+          - Fracture
+          - general_Cast
+          - general_Fracture
+          - general_Previous
+          - general_Radius
+          - general_Radius,_distal
+          - general_Ulna
+          - general_Ulna,_distal
+          - Other_fracture
+          - Previous_fracture
+      BP_wrist_images:
+        modality: output
+        type: Multi_Bipolar
+        to_each_view_its_own_label: true
+        columns:
+          - data_frontal_inclination_same
+          - data_lateral_tilt_same
+      M_wrist_frontal:
+        modality: output
+        type: Multi_Coordinate
+        column_prefixes:
+          - data_frontal_ulna_axis_c1
+          - data_frontal_ulna_axis_c2
+          - data_frontal_inclination_line1_c1
+          - data_frontal_inclination_line1_c2
+          - data_frontal_inclination_line2_c1
+          - data_frontal_inclination_line2_c2
+      M_wrist_lateral:
+        modality: output
+        type: Multi_Coordinate
+        column_prefixes:
+          - data_lateral_tilt_line1_c1
+          - data_lateral_tilt_line1_c2
+          - data_lateral_tilt_line2_c1
+          - data_lateral_tilt_line2_c2
+  pseudo_train_set:
+    annotations_path: inner_pseudo_train_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  max_train_set:
+    annotations_path: inner_train_max_2020-02-20.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set
+  val_set:
+    annotations_path: inner_validation_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set
+  test_set:
+    annotations_path: inner_test_2020-02-20.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set

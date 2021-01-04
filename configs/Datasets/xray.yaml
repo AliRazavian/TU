@@ -1,0 +1,124 @@
+---
+img_root: xray_root
+annotations_url: none
+priority_transform_modality: image
+signal_to_noise_ratio: 0.7
+jitter_pool: max
+multi_view_per_sample: true
+to_each_view_its_own_label: false
+experiments:
+  supervised_train_set:
+    annotations_path: supervised_train_set.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities:
+      ID:
+        type: ID_from_indices
+        consistency: Number
+        num_channels: 256
+        modality: output
+      text:
+        modality: input
+        type: Char_Sequence
+        column_name: Rprt
+        language_space: sv
+        case_sensitive: false
+        dictionary: " .,\\-abcdefghijklmnopqrstuvwxyzäåö$()"
+        discard_numbers: true
+        sentence_length: 512
+        model_cfgs:
+          model_type: One_to_One
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            add_max_pool_after_each_block: true
+            block_output_cs:
+              - 64
+              - 64
+            block_counts:
+              - 1
+              - 1
+            kernel_sizes:
+              - 5
+              - 3
+      image:
+        modality: input
+        type: Image_from_Filename
+        column_name: Filename
+        colorspace: Gray
+        scale_to: 256
+        keep_aspect: true
+        width: 256
+        height: 256
+        model_cfgs:
+          model_type: One_to_One
+          heads:
+            - image
+          tails:
+            - implicit_image
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: ResNetBasic
+            block_output_cs:
+              - 64
+              - 64
+            block_counts:
+              - 1
+              - 1
+            kernel_sizes:
+              - 3
+              - 3
+      Exam_View:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_view
+        priority_labels:
+          - frontal
+          - sida
+          - vridning
+        to_each_view_its_own_label: true
+      Exam_Type:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_type
+      Body_Part:
+        modality: output
+        type: One_vs_Rest
+        column_name: Exam_body_part
+        to_each_view_its_own_label: true
+      Tibia:
+        modality: output
+        type: Hierarchical_Label
+        column_name: Tibia
+        to_each_view_its_own_label: true
+      Malleolar:
+        modality: output
+        type: Hierarchical_Label
+        column_name: Malleolar
+        to_each_view_its_own_label: true
+      Pseudo_arthrosis:
+        modality: output
+        type: Bipolar
+        column_name: Pseudo_arthrosis
+      Fracture_displaced:
+        modality: output
+        type: Bipolar
+        column_name: Fracture_displaced
+      Fracture_undisplaced:
+        modality: output
+        type: Bipolar
+        column_name: Fracture_undisplaced
+      Other_bone:
+        modality: output
+        type: Bipolar
+        column_name: Other bone
+  supervised_val_set:
+    annotations_path: supervised_val_set.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_supervised_train_set
+  unsupervised_set:
+    annotations_path: unsupervised_set.csv
+    num_jitters: 2
+    spatial_transform: fix
+    modalities: same_as_supervised_train_set

@@ -1,0 +1,11 @@
+---
+task_type: training
+dataset_name: xray_ankle
+pseudo_set_name: pseudo_train_set
+train_set_name: train_set
+val_set_name: val_set
+test_set_name: test_set
+validate_when_epoch_is_devisable_by: 2
+apply:
+  classification: true
+  regression: true

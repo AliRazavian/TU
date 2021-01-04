@@ -1,0 +1,63 @@
+---
+annotations_url: https://www.dropbox.com/s/dydfcnd1yu0rk37/cifar.zip?dl=1
+add_all_class_preds: true
+priority_transform_modality: image
+priority_view_modality: object_id
+signal_to_noise_ratio: 0.95
+jitter_pool: max
+view_pool: max
+experiments:
+  train_set_full:
+    annotations_path: train_set.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities:
+      object_type:
+        modality: output
+        type: One_vs_Rest
+        column_name: object_type
+        to_each_view_its_own_label: false
+      image:
+        modality: input
+        type: image_from_filename
+        column_name: Filename
+        colorspace: RGB
+        scale_to: 32
+        keep_aspect: true
+        width: 32
+        height: 32
+        model_cfgs:
+          model_type: One_to_One
+          heads:
+          - image
+          tails:
+          - implicit_image
+          neural_net_cfgs:
+            neural_net_type: cascade
+            block_type: Basic
+            block_output_cs:
+            - 64
+            block_counts:
+            - 1
+            kernel_sizes:
+            - 7
+  val_set:
+    annotations_path: val_set.csv
+    num_jitters: 1
+    spatial_transform: fix
+    modalities: same_as_train_set_full
+  train_set_1_percent:
+    annotations_path: train_set_1_percent.csv
+    num_jitters: 1
+    spatial_transform: random
+    modalities: same_as_train_set_full
+  train_set_10_percent:
+    annotations_path: train_set_10_percent.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set_full
+  train_set_10_percent_small:
+    annotations_path: train_set_10_percent_small.csv
+    num_jitters: 2
+    spatial_transform: random
+    modalities: same_as_train_set_full

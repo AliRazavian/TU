@@ -1,4 +1,4 @@
-# DeepMed
+# Training Unit
 
 This software is designed to learn the causality/correlation between different modalities of medical data.
 These modalities include Numbers, signals with 1D consistency like language or ECG, signals with 2D consistency like images or activation maps and signals with 3D consistency like videos or MRI.
